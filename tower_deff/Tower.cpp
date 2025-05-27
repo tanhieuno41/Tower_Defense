@@ -1,18 +1,29 @@
-﻿#include "Bullet.h"
-#include "Tower.h"
-void Tower::update(float deltaTime, std::vector<Bullet>& bullets, const std::vector<Enemy>& enemies) {
-    fireTimer -= deltaTime;
-    if (fireTimer > 0.f) return;
+﻿#include "Tower.h"
+#include <cmath>
 
-    for (const Enemy& enemy : enemies) {
-        if (inRange(enemy)) {
-            // Bắn đạn vào enemy
-            sf::Vector2f towerCenter = shape.getPosition() + sf::Vector2f(shape.getRadius(), shape.getRadius());
-            sf::Vector2f enemyCenter = enemy.shape.getPosition() + sf::Vector2f(enemy.shape.getRadius(), enemy.shape.getRadius() +10);
-            bullets.emplace_back(towerCenter, enemyCenter);
+Tower::Tower(sf::Vector2f pos) : shootTimer(0.f), shootInterval(1.0f) {
+    shape.setSize(sf::Vector2f(50, 50));
+    shape.setFillColor(sf::Color::Blue);
+    shape.setPosition(pos);
+}
 
-            fireTimer = fireCooldown;  // reset timer
-            break;
-        }
+void Tower::update(float dt, std::vector<Bullet>& bullets, const std::vector<Enemy>& enemies) {
+    shootTimer += dt;
+
+    if (shootTimer >= shootInterval && !enemies.empty()) {
+        sf::Vector2f targetPos = enemies[0].getBounds().getPosition();
+        sf::Vector2f towerPos = shape.getPosition();
+        sf::Vector2f dir = targetPos - towerPos;
+
+        float length = sqrt(dir.x * dir.x + dir.y * dir.y);
+        if (length != 0)
+            dir /= length;
+
+        bullets.emplace_back(towerPos + sf::Vector2f(25, 25), dir);
+        shootTimer = 0;
     }
+}
+
+void Tower::draw(sf::RenderWindow& window) {
+    window.draw(shape);
 }

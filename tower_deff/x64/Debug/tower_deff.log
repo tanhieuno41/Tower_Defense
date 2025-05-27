@@ -1,34 +1,8 @@
-﻿  Enemy.cpp
-  Tower.cpp
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,78): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,78): warning C4244:         with
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,78): warning C4244:         [
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,78): warning C4244:             T=float
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,78): warning C4244:         ]
-  (compiling source file 'Tower.cpp')
-  
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,49): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,49): warning C4244:         with
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,49): warning C4244:         [
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,49): warning C4244:             T=float
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(22,49): warning C4244:         ]
-  (compiling source file 'Tower.cpp')
-  
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(32,44): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(32,44): warning C4244:         with
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(32,44): warning C4244:         [
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(32,44): warning C4244:             T=float
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(32,44): warning C4244:         ]
-  (compiling source file 'Tower.cpp')
-  
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(31,60): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(31,60): warning C4244:         with
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(31,60): warning C4244:         [
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(31,60): warning C4244:             T=float
-C:\Users\hieul\source\repos\tower_deff\tower_deff\Enemy.h(31,60): warning C4244:         ]
-  (compiling source file 'Tower.cpp')
-  
-  Generating Code...
-  tower_deff.vcxproj -> C:\Users\hieul\source\repos\tower_deff\x64\Debug\tower_deff.exe
-  'pwsh.exe' is not recognized as an internal or external command,
-  operable program or batch file.
+﻿  main.cpp
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(153,51): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(153,36): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(166,102): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(166,64): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(181,81): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(181,48): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  tower_deff.vcxproj -> C:\Users\LOQ\Documents\GitHub\Tower_Defense\x64\Debug\tower_deff.exe

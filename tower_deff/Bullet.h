@@ -1,36 +1,18 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include <cmath>
 
 class Bullet {
 public:
-    void draw(sf::RenderWindow& window) const {
-        window.draw(shape);
-    }
+    Bullet(sf::Vector2f pos, sf::Vector2f dir);
+    void update(float dt);
+    void draw(sf::RenderWindow& window) const;
+    sf::FloatRect getBounds() const;
+    bool isActive() const;
+    void setActive(bool status);
+
+private:
     sf::CircleShape shape;
-    sf::Vector2f position;
-    sf::Vector2f velocity;
-    float speed = 300.f;
-    bool active = true;
-
-    Bullet(sf::Vector2f startPos, sf::Vector2f targetPos) {
-        position = startPos;
-        shape.setRadius(5.f);
-        shape.setFillColor(sf::Color::Yellow);
-        shape.setPosition(position);
-
-        sf::Vector2f direction = targetPos - startPos;
-        float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (length != 0) direction /= length;
-        velocity = direction * speed;
-    }
-
-    void update(float deltaTime) {
-        position += velocity * deltaTime;
-        shape.setPosition(position);
-    }
-
-    void draw(sf::RenderWindow& window) {
-        window.draw(shape);
-    }
+    sf::Vector2f direction;
+    float speed;
+    bool active;
 };
