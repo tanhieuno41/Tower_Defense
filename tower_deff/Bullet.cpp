@@ -38,3 +38,6 @@ void Bullet::setActive(bool status) {
 int Bullet::getDamage() const {
     return damage;
 }
+sf::Vector2f Bullet::getPosition() const {
+    return shape.getPosition();
+}

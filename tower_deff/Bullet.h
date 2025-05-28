@@ -17,4 +17,5 @@ public:
     bool isActive() const;
     void setActive(bool status);
     int getDamage() const;
+    sf::Vector2f getPosition() const;
 };

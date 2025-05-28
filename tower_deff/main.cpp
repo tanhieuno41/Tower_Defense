@@ -82,6 +82,13 @@ void findPath() {
 	std::reverse(pathPoints.begin(), pathPoints.end());
 }
 
+// Thông tin cho mỗi wave
+struct WaveInfo {
+	int numEnemies;
+	float spawnInterval;
+	sf::Color color;
+};
+
 class Game {
 public:
 	sf::RenderWindow window;
@@ -117,9 +124,27 @@ public:
 	// Selected tower for upgrade
 	int selectedTowerIndex;
 
+	// --- Wave system ---
+	std::vector<WaveInfo> waves;
+	int currentWaveIdx = 0;
+	int enemiesSpawned = 0;
+	int enemiesToSpawn = 0;
+	float waveSpawnTimer = 0.f;
+	bool waveInProgress = false;
+	bool waitingForNextWave = false;
+
+	static const int TARGET_FPS = 60;
+	static const float TARGET_FRAME_TIME;
+	sf::Clock frameClock;
+
+	sf::VertexArray mapVertices;  // Vertex array cho map
+	bool mapNeedsUpdate;  // Flag để biết khi nào cần update map
+
 	Game() : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Tower Defense Game"),
 		currentScreen(GameScreen::MAIN_MENU), selectedOption(0), spawnTimer(0.f),
-		spawnInterval(1.5f), buildingMode(false), selectedTowerIndex(-1) {
+		spawnInterval(1.5f), buildingMode(false), selectedTowerIndex(-1),
+		mapVertices(sf::Quads), mapNeedsUpdate(true) {
+		window.setFramerateLimit(TARGET_FPS);  // Giới hạn FPS
 
 		if (!font.loadFromFile("arial.ttf")) {
 			// Fallback nếu không load được font
@@ -128,12 +153,27 @@ public:
 
 		setupMenu();
 		setupUI();
-		setupEnemyQueue();
 		findPath();
 
 		gameState.money = 500;
 		gameState.health = 100;
 		gameState.wave = 1;
+
+		// Khởi tạo các wave mẫu
+		waves.push_back({ 5, 1.0f, sf::Color::Red });
+		waves.push_back({ 8, 0.8f, sf::Color::Blue });
+		waves.push_back({ 12, 0.7f, sf::Color::Magenta });
+		waves.push_back({ 16, 0.6f, sf::Color::Cyan });
+		waves.push_back({ 20, 0.5f, sf::Color::Yellow });
+		waves.push_back({ 25, 0.4f, sf::Color::Green });
+		currentWaveIdx = 0;
+		waveInProgress = false;
+		waitingForNextWave = true;
+		enemiesSpawned = 0;
+		enemiesToSpawn = 0;
+		waveSpawnTimer = 0.f;
+
+		setupMapVertices();  // Khởi tạo vertex array cho map
 	}
 
 	void setupMenu() {
@@ -181,13 +221,25 @@ public:
 		rangePreview.setOutlineThickness(2);
 	}
 
-	void setupEnemyQueue() {
-		enemyQueue.push({ 100, sf::Color::Red });
-		enemyQueue.push({ 150, sf::Color::Blue });
-		enemyQueue.push({ 200, sf::Color::Magenta });
-		enemyQueue.push({ 180, sf::Color::Cyan });
-		enemyQueue.push({ 220, sf::Color::Yellow });
-		enemyQueue.push({ 250, sf::Color::Green });
+	void setupMapVertices() {
+		mapVertices.clear();
+		for (int y = 0; y < MAP_HEIGHT; ++y) {
+			for (int x = 0; x < MAP_WIDTH; ++x) {
+				sf::Color tileColor = (tileMap[y][x] == 1) ? 
+					sf::Color(192, 128, 0) : sf::Color(0, 128, 0);
+				
+				// Thêm 4 vertex cho mỗi tile
+				sf::Vertex v1(sf::Vector2f(x * TILE_SIZE, y * TILE_SIZE), tileColor);
+				sf::Vertex v2(sf::Vector2f((x + 1) * TILE_SIZE, y * TILE_SIZE), tileColor);
+				sf::Vertex v3(sf::Vector2f((x + 1) * TILE_SIZE, (y + 1) * TILE_SIZE), tileColor);
+				sf::Vertex v4(sf::Vector2f(x * TILE_SIZE, (y + 1) * TILE_SIZE), tileColor);
+				
+				mapVertices.append(v1);
+				mapVertices.append(v2);
+				mapVertices.append(v3);
+				mapVertices.append(v4);
+			}
+		}
 	}
 
 	void handleEvents() {
@@ -354,8 +406,12 @@ public:
 			enemies.clear();
 			towers.clear();
 			bullets.clear();
-			setupEnemyQueue();
-			spawnTimer = 0.f;
+			currentWaveIdx = 0;
+			waveInProgress = false;
+			waitingForNextWave = true;
+			enemiesSpawned = 0;
+			enemiesToSpawn = 0;
+			waveSpawnTimer = 0.f;
 		}
 
 		void saveGame() {
@@ -376,10 +432,8 @@ public:
 			std::ifstream file("savegame.dat");
 			if (file.is_open()) {
 				file >> gameState.money >> gameState.health >> gameState.wave;
-
 				int towerCount;
 				file >> towerCount;
-
 				towers.clear();
 				for (int i = 0; i < towerCount; i++) {
 					float x, y;
@@ -390,12 +444,17 @@ public:
 						towers.back().upgrade();
 					}
 				}
-
 				file.close();
 				currentScreen = GameScreen::PLAYING;
 				enemies.clear();
 				bullets.clear();
-				setupEnemyQueue();
+				// Khôi phục wave
+				currentWaveIdx = gameState.wave - 1;
+				waveInProgress = false;
+				waitingForNextWave = true;
+				enemiesSpawned = 0;
+				enemiesToSpawn = 0;
+				waveSpawnTimer = 0.f;
 				std::cout << "Game loaded!\n";
 			}
 			else {
@@ -403,18 +462,37 @@ public:
 			}
 		}
 
-		void update() {
+		void update(float deltaTime) {
 			if (currentScreen != GameScreen::PLAYING) return;
 
-			float deltaTime = clock.restart().asSeconds();
-			spawnTimer += deltaTime;
+			waveSpawnTimer += deltaTime;
 
-			// Spawn enemies
-			if (spawnTimer >= spawnInterval && !enemyQueue.empty()) {
-				auto data = enemyQueue.front();
-				enemyQueue.pop();
-				enemies.emplace_back(pathPoints, data.second, 100.f, data.first);
-				spawnTimer = 0.f;
+			// Bắt đầu wave mới khi nhấn Space
+			if (waitingForNextWave && sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+				if (currentWaveIdx < waves.size()) {
+					waveInProgress = true;
+					waitingForNextWave = false;
+					enemiesSpawned = 0;
+					enemiesToSpawn = waves[currentWaveIdx].numEnemies;
+					waveSpawnTimer = 0.f;
+					gameState.wave = currentWaveIdx + 1;
+				}
+			}
+
+			// Spawn enemies theo wave
+			if (waveInProgress && enemiesSpawned < enemiesToSpawn) {
+				if (waveSpawnTimer >= waves[currentWaveIdx].spawnInterval) {
+					enemies.emplace_back(pathPoints, waves[currentWaveIdx].color, 100.f, 100 + 10 * currentWaveIdx);
+					enemiesSpawned++;
+					waveSpawnTimer = 0.f;
+				}
+			}
+
+			// Khi đã spawn hết và không còn quái trên bản đồ, chuyển sang wave tiếp
+			if (waveInProgress && enemiesSpawned >= enemiesToSpawn && enemies.empty()) {
+				currentWaveIdx++;
+				waveInProgress = false;
+				waitingForNextWave = true;
 			}
 
 			// Update enemies
@@ -431,16 +509,34 @@ public:
 				tower.update(deltaTime, bullets, enemies);
 			}
 
-			// Update bullets
+			// Update bullets và kiểm tra va chạm tối ưu
 			for (auto& b : bullets) {
+				if (!b.isActive()) continue;  // Bỏ qua bullet không active
+				
 				b.update(deltaTime);
+				sf::FloatRect bulletBounds = b.getBounds();
+				
+				// Chỉ kiểm tra va chạm với enemies trong phạm vi
 				for (auto& e : enemies) {
-					if (b.getBounds().intersects(e.getBounds())) {
-						e.takeDamage(20);
-						if (!e.isAlive()) {
-							gameState.money += 25;
+					if (!e.isAlive()) continue;  // Bỏ qua enemy đã chết
+					
+					// Kiểm tra khoảng cách trước khi kiểm tra va chạm
+					sf::Vector2f bulletPos = b.getPosition();
+					sf::Vector2f enemyPos = e.getPosition();
+					float dx = bulletPos.x - enemyPos.x;
+					float dy = bulletPos.y - enemyPos.y;
+					float distanceSquared = dx * dx + dy * dy;
+					
+					// Nếu khoảng cách nhỏ hơn tổng bán kính + một khoảng buffer
+					if (distanceSquared < 1000) {  // 1000 = (20 + 20)^2 + buffer
+						if (b.getBounds().intersects(e.getBounds())) {
+							e.takeDamage(20);
+							if (!e.isAlive()) {
+								gameState.money += 25;
+							}
+							b.setActive(false);
+							break;  // Bullet đã trúng, không cần kiểm tra với enemy khác
 						}
-						b.setActive(false);
 					}
 				}
 			}
@@ -448,11 +544,11 @@ public:
 			// Remove inactive bullets and dead enemies
 			bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) {
 				return !b.isActive();
-				}), bullets.end());
+			}), bullets.end());
 
 			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) {
 				return !e.isAlive();
-				}), enemies.end());
+			}), enemies.end());
 
 			// Check game over
 			if (gameState.health <= 0) {
@@ -462,7 +558,7 @@ public:
 			// Update UI text
 			moneyText.setString("Money: $" + std::to_string(gameState.money));
 			healthText.setString("Health: " + std::to_string(gameState.health));
-			waveText.setString("Wave: " + std::to_string(gameState.wave));
+			waveText.setString("Wave: " + std::to_string(gameState.wave) + "/" + std::to_string((int)waves.size()));
 		}
 
 		void render() {
@@ -502,26 +598,28 @@ public:
 		}
 
 		void renderGame() {
-			// Draw map
-			for (int y = 0; y < MAP_HEIGHT; ++y) {
-				for (int x = 0; x < MAP_WIDTH; ++x) {
-					sf::RectangleShape tile(sf::Vector2f(TILE_SIZE - 2, TILE_SIZE - 2));
-					tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
-					if (tileMap[y][x] == 1)
-						tile.setFillColor(sf::Color(192, 128, 0));
-					else
-						tile.setFillColor(sf::Color(0, 128, 0));
-					window.draw(tile);
+			// Draw map using vertex array
+			window.draw(mapVertices);
+
+			// Draw path (chỉ vẽ một lần khi cần)
+			static sf::VertexArray pathVertices(sf::Quads);
+			if (pathVertices.getVertexCount() == 0) {
+				for (auto& p : pathPoints) {
+					float x = p.x * TILE_SIZE + TILE_SIZE / 2 - 10;
+					float y = p.y * TILE_SIZE + TILE_SIZE / 2 - 10;
+					
+					sf::Vertex v1(sf::Vector2f(x, y), sf::Color::White);
+					sf::Vertex v2(sf::Vector2f(x + 20, y), sf::Color::White);
+					sf::Vertex v3(sf::Vector2f(x + 20, y + 20), sf::Color::White);
+					sf::Vertex v4(sf::Vector2f(x, y + 20), sf::Color::White);
+					
+					pathVertices.append(v1);
+					pathVertices.append(v2);
+					pathVertices.append(v3);
+					pathVertices.append(v4);
 				}
 			}
-
-			// Draw path
-			for (auto& p : pathPoints) {
-				sf::CircleShape circle(10);
-				circle.setFillColor(sf::Color::White);
-				circle.setPosition(p.x * TILE_SIZE + TILE_SIZE / 2 - 10, p.y * TILE_SIZE + TILE_SIZE / 2 - 10);
-				window.draw(circle);
-			}
+			window.draw(pathVertices);
 
 			// Draw game objects
 			for (auto& e : enemies)
@@ -562,7 +660,11 @@ public:
 			// Draw instructions
 			sf::Text instructions;
 			instructions.setFont(font);
-			instructions.setString("B: Build Tower ($100) | Right Click: Select Tower | Middle Click: Upgrade ($150) | S: Save | ESC: Pause");
+			std::string instr = "B: Build Tower ($100) | Right Click: Select Tower | Middle Click: Upgrade ($150) | S: Save | ESC: Pause";
+			if (waitingForNextWave && currentWaveIdx < waves.size()) {
+				instr += " | SPACE: Next Wave";
+			}
+			instructions.setString(instr);
 			instructions.setCharacterSize(16);
 			instructions.setFillColor(sf::Color::White);
 			instructions.setPosition(200, MAP_HEIGHT * TILE_SIZE + 10);
@@ -609,9 +711,20 @@ public:
 
 		void run() {
 			while (window.isOpen()) {
+				float deltaTime = frameClock.restart().asSeconds();
+				
+				// Đảm bảo deltaTime không quá lớn để tránh physics glitch
+				if (deltaTime > 0.25f) deltaTime = 0.25f;
+				
 				handleEvents();
-				update();
+				update(deltaTime);  // Truyền deltaTime vào update
 				render();
+				
+				// Sleep nếu frame quá nhanh
+				sf::Time frameTime = frameClock.getElapsedTime();
+				if (frameTime < sf::seconds(1.0f / TARGET_FPS)) {
+					sf::sleep(sf::seconds(1.0f / TARGET_FPS) - frameTime);
+				}
 			}
 		}
 	};
@@ -621,3 +734,4 @@ public:
 		game.run();
 		return 0;
 	}
+	
