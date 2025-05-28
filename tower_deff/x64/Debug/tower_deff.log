@@ -1,8 +1,46 @@
 ﻿  main.cpp
-C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(153,51): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(153,36): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(166,102): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(166,64): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(181,81): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
-C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(181,48): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(126,17): warning C4566: character represented by universal-character-name '\u1EC3' cannot be represented in the current code page (1252)
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(126,17): warning C4566: character represented by universal-character-name '\u1EED' cannot be represented in the current code page (1252)
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(126,17): warning C4566: character represented by universal-character-name '\u1EE5' cannot be represented in the current code page (1252)
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(126,17): warning C4566: character represented by universal-character-name '\u1EB7' cannot be represented in the current code page (1252)
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(126,17): warning C4566: character represented by universal-character-name '\u0111' cannot be represented in the current code page (1252)
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(126,17): warning C4566: character represented by universal-character-name '\u1ECB' cannot be represented in the current code page (1252)
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(148,59): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,76): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,76): warning C4244:         with
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,76): warning C4244:         [
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,76): warning C4244:             T=float
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,76): warning C4244:         ]
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,41): warning C4244: 'argument': conversion from 'int' to 'T', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,41): warning C4244:         with
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,41): warning C4244:         [
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,41): warning C4244:             T=float
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(300,41): warning C4244:         ]
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(306,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(325,21): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(509,40): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(509,25): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(522,94): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(522,56): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,50): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,50): warning C4244:         with
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,50): warning C4244:         [
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,50): warning C4244:             T=int
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,50): warning C4244:         ]
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,38): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,38): warning C4244:         with
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,38): warning C4244:         [
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,38): warning C4244:             T=int
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(550,38): warning C4244:         ]
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,50): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,50): warning C4244:         with
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,50): warning C4244:         [
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,50): warning C4244:             T=int
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,50): warning C4244:         ]
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,38): warning C4244: 'argument': conversion from 'T' to 'float', possible loss of data
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,38): warning C4244:         with
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,38): warning C4244:         [
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,38): warning C4244:             T=int
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(551,38): warning C4244:         ]
+C:\Users\LOQ\Documents\GitHub\Tower_Defense\tower_deff\main.cpp(595,75): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
   tower_deff.vcxproj -> C:\Users\LOQ\Documents\GitHub\Tower_Defense\x64\Debug\tower_deff.exe
