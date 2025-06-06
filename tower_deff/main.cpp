@@ -10,34 +10,22 @@
 #include <iostream>
 
 const int TILE_SIZE = 64;
-const int MAP_WIDTH = 15;
-const int MAP_HEIGHT = 12;
-const int WINDOW_WIDTH = MAP_WIDTH * TILE_SIZE;
-const int WINDOW_HEIGHT = MAP_HEIGHT * TILE_SIZE + 100; // Thêm chỗ cho UI
+int MAP_WIDTH = 20;  // 25 tiles * 64 = 1600 pixels width
+int MAP_HEIGHT = 9;  // 14 tiles * 64 = 896 pixels height
+int WINDOW_WIDTH = MAP_WIDTH * TILE_SIZE;
+int WINDOW_HEIGHT = MAP_HEIGHT * TILE_SIZE + 184; // Tăng kích thước UI lên 184 pixels
 
 // Game States
 enum class GameScreen {
 	MAIN_MENU,
 	PLAYING,
 	PAUSED,
-	GAME_OVER
+	GAME_OVER,
+	MAP_SELECTION
 };
 
 // 0 = đất, 1 = đường đi
-int tileMap[MAP_HEIGHT][MAP_WIDTH] = {
-	{0,0,1,1,1,0,0,0,0,0,0,0,0,0,0},
-	{0,0,0,0,1,0,1,1,1,1,1,0,0,0,0},
-	{0,1,1,0,1,0,1,0,0,0,1,0,0,0,0},
-	{0,1,1,0,1,1,1,0,1,1,1,0,0,0,0},
-	{0,0,0,0,0,0,1,0,1,0,0,0,0,0,0},
-	{0,1,1,1,1,1,1,0,1,0,1,1,1,1,0},
-	{0,1,0,0,0,0,0,0,1,0,1,0,0,1,0},
-	{0,1,0,0,0,0,0,0,1,0,1,0,0,1,0},
-	{0,1,1,1,1,1,1,1,1,1,1,1,1,1,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,1,0},
-	{0,0,0,0,0,0,0,0,0,0,0,0,0,1,0}
-};
+std::vector<std::vector<int>> tileMap;  // Changed from fixed array to vector
 
 std::vector<sf::Vector2i> pathPoints;
 
@@ -48,7 +36,7 @@ void findPath() {
 	std::queue<sf::Vector2i> q;
 
 	sf::Vector2i start = { 2, 0 };
-	sf::Vector2i end = { 13, 11 };
+	sf::Vector2i end = { MAP_WIDTH - 2, MAP_HEIGHT - 1 };  // Updated to use dynamic end point
 
 	q.push(start);
 	visited[start.y][start.x] = true;
@@ -140,6 +128,11 @@ public:
 	sf::VertexArray mapVertices;  // Vertex array cho map
 	bool mapNeedsUpdate;  // Flag để biết khi nào cần update map
 
+	static const int MAX_MAPS = 5;
+	int currentMapIndex = 0;
+	std::vector<std::vector<std::vector<int>>> maps;  // Vector chứa tất cả các map
+	std::vector<std::string> mapNames;  // Tên các map
+
 	Game() : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Tower Defense Game"),
 		currentScreen(GameScreen::MAIN_MENU), selectedOption(0), spawnTimer(0.f),
 		spawnInterval(1.5f), buildingMode(false), selectedTowerIndex(-1),
@@ -151,6 +144,21 @@ public:
 			std::cout << "Không thể load font, sử dụng font mặc định\n";
 		}
 
+		// Khởi tạo tên map
+		mapNames = {
+			"Map 1: S-Shaped Path",
+			"Map 2: Spiral Path",
+			"Map 3: Zigzag Path",
+			"Map 4: Maze Path",
+			"Map 5: U-Shaped Path"
+		};
+
+		// Load tất cả map
+		loadAllMaps();
+		
+		// Khởi tạo tileMap với kích thước mặc định
+		tileMap.resize(MAP_HEIGHT, std::vector<int>(MAP_WIDTH, 0));
+		
 		setupMenu();
 		setupUI();
 		findPath();
@@ -190,24 +198,24 @@ public:
 	}
 
 	void setupUI() {
-		uiBackground.setSize(sf::Vector2f(WINDOW_WIDTH, 100));
+		uiBackground.setSize(sf::Vector2f(WINDOW_WIDTH, 184));  // Tăng kích thước UI background
 		uiBackground.setPosition(0, MAP_HEIGHT * TILE_SIZE);
 		uiBackground.setFillColor(sf::Color(50, 50, 50));
 
 		moneyText.setFont(font);
-		moneyText.setCharacterSize(24);
+		moneyText.setCharacterSize(32);  // Tăng kích thước chữ
 		moneyText.setFillColor(sf::Color::Yellow);
-		moneyText.setPosition(10, MAP_HEIGHT * TILE_SIZE + 10);
+		moneyText.setPosition(20, MAP_HEIGHT * TILE_SIZE + 20);
 
 		healthText.setFont(font);
-		healthText.setCharacterSize(24);
+		healthText.setCharacterSize(32);  // Tăng kích thước chữ
 		healthText.setFillColor(sf::Color::Red);
-		healthText.setPosition(10, MAP_HEIGHT * TILE_SIZE + 40);
+		healthText.setPosition(20, MAP_HEIGHT * TILE_SIZE + 70);
 
 		waveText.setFont(font);
-		waveText.setCharacterSize(24);
+		waveText.setCharacterSize(32);  // Tăng kích thước chữ
 		waveText.setFillColor(sf::Color::Cyan);
-		waveText.setPosition(10, MAP_HEIGHT * TILE_SIZE + 70);
+		waveText.setPosition(20, MAP_HEIGHT * TILE_SIZE + 120);
 
 		// Tower preview
 		towerPreview.setRadius(25);
@@ -259,13 +267,14 @@ public:
 				case GameScreen::PAUSED:
 					handlePauseInput(event.key.code);
 					break;
-					break;
 				case GameScreen::GAME_OVER:
 					if (event.key.code == sf::Keyboard::Escape)
 						currentScreen = GameScreen::MAIN_MENU;
 					break;
+				case GameScreen::MAP_SELECTION:
+					handleMapSelectionInput(event.key.code);
+					break;
 				}
-
 			}
 
 			if (event.type == sf::Event::MouseButtonPressed && currentScreen == GameScreen::PLAYING) {
@@ -300,7 +309,6 @@ public:
 		}
 	}
 	void handlePauseInput(sf::Keyboard::Key key) {
-
 		switch (key) {
 		case sf::Keyboard::Up:
 			selectedOption = (selectedOption - 1 + 3) % 3;
@@ -326,412 +334,507 @@ public:
 		}
 	}
 
-		void handleGameInput(sf::Keyboard::Key key) {
-			switch (key) {
-			case sf::Keyboard::Escape:
-				currentScreen = GameScreen::PAUSED;
-				break;
-			case sf::Keyboard::S:
-				saveGame();
-				break;
-			case sf::Keyboard::B:
-				buildingMode = !buildingMode;
-				break;
-			}
+	void handleGameInput(sf::Keyboard::Key key) {
+		switch (key) {
+		case sf::Keyboard::Escape:
+			currentScreen = GameScreen::PAUSED;
+			break;
+		case sf::Keyboard::S:
+			saveGame();
+			break;
+		case sf::Keyboard::B:
+			buildingMode = !buildingMode;
+			break;
 		}
+	}
 
-		void handleMouseInput(sf::Event::MouseButtonEvent mouse) {
-			if (buildingMode && mouse.button == sf::Mouse::Left) {
-				// Build tower
-				int gridX = mouse.x / TILE_SIZE;
-				int gridY = mouse.y / TILE_SIZE;
+	void handleMouseInput(sf::Event::MouseButtonEvent mouse) {
+		if (buildingMode && mouse.button == sf::Mouse::Left) {
+			// Build tower
+			int gridX = mouse.x / TILE_SIZE;
+			int gridY = mouse.y / TILE_SIZE;
 
-				if (gridX >= 0 && gridX < MAP_WIDTH && gridY >= 0 && gridY < MAP_HEIGHT
-					&& tileMap[gridY][gridX] == 0 && gameState.money >= 100) {
+			if (gridX >= 0 && gridX < MAP_WIDTH && gridY >= 0 && gridY < MAP_HEIGHT
+				&& tileMap[gridY][gridX] == 0 && gameState.money >= 100) {
 
-					sf::Vector2f pos(gridX * TILE_SIZE + TILE_SIZE / 2, gridY * TILE_SIZE + TILE_SIZE / 2);
+				sf::Vector2f pos(gridX * TILE_SIZE + TILE_SIZE / 2, gridY * TILE_SIZE + TILE_SIZE / 2);
 
-					// Kiểm tra không có tower nào ở vị trí này
-					bool canBuild = true;
-					for (const auto& tower : towers) {
-						sf::Vector2f towerPos = tower.getPosition();
-						float distance = sqrt(pow(pos.x - towerPos.x, 2) + pow(pos.y - towerPos.y, 2));
-						if (distance < 60) {
-							canBuild = false;
-							break;
-						}
-					}
-
-					if (canBuild) {
-						towers.emplace_back(pos);
-						gameState.money -= 100;
-						buildingMode = false;
-					}
-				}
-			}
-			else if (mouse.button == sf::Mouse::Right) {
-				// Select tower for upgrade
-				selectedTowerIndex = -1;
-				for (int i = 0; i < towers.size(); i++) {
-					sf::Vector2f towerPos = towers[i].getPosition();
-					float distance = sqrt(pow(mouse.x - towerPos.x, 2) + pow(mouse.y - towerPos.y, 2));
-					if (distance < 30) {
-						selectedTowerIndex = i;
+				// Kiểm tra không có tower nào ở vị trí này
+				bool canBuild = true;
+				for (const auto& tower : towers) {
+					sf::Vector2f towerPos = tower.getPosition();
+					float distance = sqrt(pow(pos.x - towerPos.x, 2) + pow(pos.y - towerPos.y, 2));
+					if (distance < 60) {
+						canBuild = false;
 						break;
 					}
 				}
-			}
-			else if (mouse.button == sf::Mouse::Middle && selectedTowerIndex != -1) {
-				// Upgrade tower
-				if (gameState.money >= 150) {
-					towers[selectedTowerIndex].upgrade();
-					gameState.money -= 150;
-					selectedTowerIndex = -1;
+
+				if (canBuild) {
+					towers.emplace_back(pos);
+					gameState.money -= 100;
+					buildingMode = false;
 				}
 			}
 		}
-
-		void updateMenuColors() {
-			for (int i = 0; i < menuOptions.size(); i++) {
-				menuOptions[i].setFillColor(i == selectedOption ? sf::Color::Yellow : sf::Color::White);
+		else if (mouse.button == sf::Mouse::Right) {
+			// Select tower for upgrade
+			selectedTowerIndex = -1;
+			for (int i = 0; i < towers.size(); i++) {
+				sf::Vector2f towerPos = towers[i].getPosition();
+				float distance = sqrt(pow(mouse.x - towerPos.x, 2) + pow(mouse.y - towerPos.y, 2));
+				if (distance < 30) {
+					selectedTowerIndex = i;
+					break;
+				}
 			}
 		}
+		else if (mouse.button == sf::Mouse::Middle && selectedTowerIndex != -1) {
+			// Upgrade tower
+			if (gameState.money >= 150) {
+				towers[selectedTowerIndex].upgrade();
+				gameState.money -= 150;
+				selectedTowerIndex = -1;
+			}
+		}
+	}
 
-		void startNewGame() {
-			currentScreen = GameScreen::PLAYING;
-			gameState.reset();
-			gameState.money = 500;
-			gameState.health = 100;
-			gameState.wave = 1;
-			enemies.clear();
+	void updateMenuColors() {
+		for (int i = 0; i < menuOptions.size(); i++) {
+			menuOptions[i].setFillColor(i == selectedOption ? sf::Color::Yellow : sf::Color::White);
+		}
+	}
+
+	void startNewGame() {
+		currentScreen = GameScreen::MAP_SELECTION;  // Chuyển sang màn chọn map
+		selectedOption = 0;
+	}
+
+	void saveGame() {
+		std::ofstream file("savegame.dat");
+		if (file.is_open()) {
+			file << gameState.money << " " << gameState.health << " " << gameState.wave << "\n";
+			file << currentMapIndex << "\n";  // Lưu map hiện tại
+			file << towers.size() << "\n";
+			for (const auto& tower : towers) {
+				sf::Vector2f pos = tower.getPosition();
+				file << pos.x << " " << pos.y << " " << tower.getLevel() << "\n";
+			}
+			file.close();
+			std::cout << "Game saved!\n";
+		}
+	}
+
+	void loadGame() {
+		std::ifstream file("savegame.dat");
+		if (file.is_open()) {
+			file >> gameState.money >> gameState.health >> gameState.wave;
+			file >> currentMapIndex;  // Load map đã lưu
+			loadMap(currentMapIndex);  // Load map trước
+			
+			int towerCount;
+			file >> towerCount;
 			towers.clear();
+			for (int i = 0; i < towerCount; i++) {
+				float x, y;
+				int level;
+				file >> x >> y >> level;
+				towers.emplace_back(sf::Vector2f(x, y));
+				for (int j = 1; j < level; j++) {
+					towers.back().upgrade();
+				}
+			}
+			file.close();
+			currentScreen = GameScreen::PLAYING;
+			enemies.clear();
 			bullets.clear();
-			currentWaveIdx = 0;
+			currentWaveIdx = gameState.wave - 1;
 			waveInProgress = false;
 			waitingForNextWave = true;
 			enemiesSpawned = 0;
 			enemiesToSpawn = 0;
 			waveSpawnTimer = 0.f;
+			std::cout << "Game loaded!\n";
 		}
-
-		void saveGame() {
-			std::ofstream file("savegame.dat");
-			if (file.is_open()) {
-				file << gameState.money << " " << gameState.health << " " << gameState.wave << "\n";
-				file << towers.size() << "\n";
-				for (const auto& tower : towers) {
-					sf::Vector2f pos = tower.getPosition();
-					file << pos.x << " " << pos.y << " " << tower.getLevel() << "\n";
-				}
-				file.close();
-				std::cout << "Game saved!\n";
-			}
+		else {
+			std::cout << "No save file found!\n";
 		}
-
-		void loadGame() {
-			std::ifstream file("savegame.dat");
-			if (file.is_open()) {
-				file >> gameState.money >> gameState.health >> gameState.wave;
-				int towerCount;
-				file >> towerCount;
-				towers.clear();
-				for (int i = 0; i < towerCount; i++) {
-					float x, y;
-					int level;
-					file >> x >> y >> level;
-					towers.emplace_back(sf::Vector2f(x, y));
-					for (int j = 1; j < level; j++) {
-						towers.back().upgrade();
-					}
-				}
-				file.close();
-				currentScreen = GameScreen::PLAYING;
-				enemies.clear();
-				bullets.clear();
-				// Khôi phục wave
-				currentWaveIdx = gameState.wave - 1;
-				waveInProgress = false;
-				waitingForNextWave = true;
-				enemiesSpawned = 0;
-				enemiesToSpawn = 0;
-				waveSpawnTimer = 0.f;
-				std::cout << "Game loaded!\n";
-			}
-			else {
-				std::cout << "No save file found!\n";
-			}
-		}
-
-		void update(float deltaTime) {
-			if (currentScreen != GameScreen::PLAYING) return;
-
-			waveSpawnTimer += deltaTime;
-
-			// Bắt đầu wave mới khi nhấn Space
-			if (waitingForNextWave && sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
-				if (currentWaveIdx < waves.size()) {
-					waveInProgress = true;
-					waitingForNextWave = false;
-					enemiesSpawned = 0;
-					enemiesToSpawn = waves[currentWaveIdx].numEnemies;
-					waveSpawnTimer = 0.f;
-					gameState.wave = currentWaveIdx + 1;
-				}
-			}
-
-			// Spawn enemies theo wave
-			if (waveInProgress && enemiesSpawned < enemiesToSpawn) {
-				if (waveSpawnTimer >= waves[currentWaveIdx].spawnInterval) {
-					enemies.emplace_back(pathPoints, waves[currentWaveIdx].color, 100.f, 100 + 10 * currentWaveIdx);
-					enemiesSpawned++;
-					waveSpawnTimer = 0.f;
-				}
-			}
-
-			// Khi đã spawn hết và không còn quái trên bản đồ, chuyển sang wave tiếp
-			if (waveInProgress && enemiesSpawned >= enemiesToSpawn && enemies.empty()) {
-				currentWaveIdx++;
-				waveInProgress = false;
-				waitingForNextWave = true;
-			}
-
-			// Update enemies
-			for (auto& e : enemies) {
-				e.update(deltaTime);
-				if (e.reachedEnd()) {
-					gameState.health -= 10;
-					e.setAlive(false);
-				}
-			}
-
-			// Update towers
-			for (auto& tower : towers) {
-				tower.update(deltaTime, bullets, enemies);
-			}
-
-			// Update bullets và kiểm tra va chạm tối ưu
-			for (auto& b : bullets) {
-				if (!b.isActive()) continue;  // Bỏ qua bullet không active
-				
-				b.update(deltaTime);
-				sf::FloatRect bulletBounds = b.getBounds();
-				
-				// Chỉ kiểm tra va chạm với enemies trong phạm vi
-				for (auto& e : enemies) {
-					if (!e.isAlive()) continue;  // Bỏ qua enemy đã chết
-					
-					// Kiểm tra khoảng cách trước khi kiểm tra va chạm
-					sf::Vector2f bulletPos = b.getPosition();
-					sf::Vector2f enemyPos = e.getPosition();
-					float dx = bulletPos.x - enemyPos.x;
-					float dy = bulletPos.y - enemyPos.y;
-					float distanceSquared = dx * dx + dy * dy;
-					
-					// Nếu khoảng cách nhỏ hơn tổng bán kính + một khoảng buffer
-					if (distanceSquared < 1000) {  // 1000 = (20 + 20)^2 + buffer
-						if (b.getBounds().intersects(e.getBounds())) {
-							e.takeDamage(20);
-							if (!e.isAlive()) {
-								gameState.money += 25;
-							}
-							b.setActive(false);
-							break;  // Bullet đã trúng, không cần kiểm tra với enemy khác
-						}
-					}
-				}
-			}
-
-			// Remove inactive bullets and dead enemies
-			bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) {
-				return !b.isActive();
-			}), bullets.end());
-
-			enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) {
-				return !e.isAlive();
-			}), enemies.end());
-
-			// Check game over
-			if (gameState.health <= 0) {
-				currentScreen = GameScreen::GAME_OVER;
-			}
-
-			// Update UI text
-			moneyText.setString("Money: $" + std::to_string(gameState.money));
-			healthText.setString("Health: " + std::to_string(gameState.health));
-			waveText.setString("Wave: " + std::to_string(gameState.wave) + "/" + std::to_string((int)waves.size()));
-		}
-
-		void render() {
-			window.clear();
-
-			switch (currentScreen) {
-			case GameScreen::MAIN_MENU:
-				renderMenu();
-				break;
-			case GameScreen::PLAYING:
-				renderGame();
-				break;
-			case GameScreen::PAUSED:
-				renderGame();
-				renderPauseMenu(window, font, selectedOption);
-				break;
-			case GameScreen::GAME_OVER:
-				renderGameOver();
-				break;
-			}
-
-			window.display();
-		}
-
-		void renderMenu() {
-			sf::Text title;
-			title.setFont(font);
-			title.setString("Tower Defense");
-			title.setCharacterSize(72);
-			title.setFillColor(sf::Color::White);
-			title.setPosition(WINDOW_WIDTH / 2 - 200, 50);
-			window.draw(title);
-
-			for (const auto& option : menuOptions) {
-				window.draw(option);
-			}
-		}
-
-		void renderGame() {
-			// Draw map using vertex array
-			window.draw(mapVertices);
-
-			// Draw path (chỉ vẽ một lần khi cần)
-			static sf::VertexArray pathVertices(sf::Quads);
-			if (pathVertices.getVertexCount() == 0) {
-				for (auto& p : pathPoints) {
-					float x = p.x * TILE_SIZE + TILE_SIZE / 2 - 10;
-					float y = p.y * TILE_SIZE + TILE_SIZE / 2 - 10;
-					
-					sf::Vertex v1(sf::Vector2f(x, y), sf::Color::White);
-					sf::Vertex v2(sf::Vector2f(x + 20, y), sf::Color::White);
-					sf::Vertex v3(sf::Vector2f(x + 20, y + 20), sf::Color::White);
-					sf::Vertex v4(sf::Vector2f(x, y + 20), sf::Color::White);
-					
-					pathVertices.append(v1);
-					pathVertices.append(v2);
-					pathVertices.append(v3);
-					pathVertices.append(v4);
-				}
-			}
-			window.draw(pathVertices);
-
-			// Draw game objects
-			for (auto& e : enemies)
-				e.draw(window);
-
-			for (auto& tower : towers)
-				tower.draw(window);
-
-			for (auto& b : bullets)
-				b.draw(window);
-
-			// Draw selected tower highlight
-			if (selectedTowerIndex != -1) {
-				sf::CircleShape highlight(40);
-				highlight.setOrigin(40, 40);
-				highlight.setPosition(towers[selectedTowerIndex].getPosition());
-				highlight.setFillColor(sf::Color::Transparent);
-				highlight.setOutlineColor(sf::Color::Yellow);
-				highlight.setOutlineThickness(3);
-				window.draw(highlight);
-			}
-
-			// Draw building mode preview
-			if (buildingMode) {
-				sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-				towerPreview.setPosition(mousePos.x, mousePos.y);
-				rangePreview.setPosition(mousePos.x, mousePos.y);
-				window.draw(rangePreview);
-				window.draw(towerPreview);
-			}
-
-			// Draw UI
-			window.draw(uiBackground);
-			window.draw(moneyText);
-			window.draw(healthText);
-			window.draw(waveText);
-
-			// Draw instructions
-			sf::Text instructions;
-			instructions.setFont(font);
-			std::string instr = "B: Build Tower ($100) | Right Click: Select Tower | Middle Click: Upgrade ($150) | S: Save | ESC: Pause";
-			if (waitingForNextWave && currentWaveIdx < waves.size()) {
-				instr += " | SPACE: Next Wave";
-			}
-			instructions.setString(instr);
-			instructions.setCharacterSize(16);
-			instructions.setFillColor(sf::Color::White);
-			instructions.setPosition(200, MAP_HEIGHT * TILE_SIZE + 10);
-			window.draw(instructions);
-		}
-
-		void renderPauseMenu(sf::RenderWindow & window, sf::Font & font, int selectedOption) {
-			// Tạo lớp phủ mờ
-			sf::RectangleShape overlay(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
-			overlay.setFillColor(sf::Color(0, 0, 0, 180));
-			window.draw(overlay);
-
-			// Tiêu đề PAUSED
-			sf::Text title;
-			title.setFont(font);
-			title.setString("PAUSED");
-			title.setCharacterSize(48);
-			title.setFillColor(sf::Color::White);
-			title.setPosition(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 150);
-			window.draw(title);
-
-			// Tùy chọn menu
-			std::vector<std::string> options = { "Continue", "Return to Main Menu" };
-			for (int i = 0; i < options.size(); ++i) {
-				sf::Text optionText;
-				optionText.setFont(font);
-				optionText.setString(options[i]);
-				optionText.setCharacterSize(36);
-				optionText.setFillColor(i == selectedOption ? sf::Color::Yellow : sf::Color::White);
-				optionText.setPosition(WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 - 30 + i * 60);
-				window.draw(optionText);
-			}
-		}
-
-		void renderGameOver() {
-			sf::Text gameOverText;
-			gameOverText.setFont(font);
-			gameOverText.setString("GAME OVER\nPress ESC to return to menu");
-			gameOverText.setCharacterSize(48);
-			gameOverText.setFillColor(sf::Color::Red);
-			gameOverText.setPosition(WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 50);
-			window.draw(gameOverText);
-		}
-
-		void run() {
-			while (window.isOpen()) {
-				float deltaTime = frameClock.restart().asSeconds();
-				
-				// Đảm bảo deltaTime không quá lớn để tránh physics glitch
-				if (deltaTime > 0.25f) deltaTime = 0.25f;
-				
-				handleEvents();
-				update(deltaTime);  // Truyền deltaTime vào update
-				render();
-				
-				// Sleep nếu frame quá nhanh
-				sf::Time frameTime = frameClock.getElapsedTime();
-				if (frameTime < sf::seconds(1.0f / TARGET_FPS)) {
-					sf::sleep(sf::seconds(1.0f / TARGET_FPS) - frameTime);
-				}
-			}
-		}
-	};
-
-	int main() {
-		Game game;
-		game.run();
-		return 0;
 	}
+
+	void loadAllMaps() {
+		maps.clear();
+		for (int i = 1; i <= MAX_MAPS; i++) {
+			std::string filename = "maps/map" + std::to_string(i) + ".txt";
+			std::ifstream file(filename);
+			if (file.is_open()) {
+				int width, height;
+				file >> width >> height;
+				
+				std::vector<std::vector<int>> map(height, std::vector<int>(width));
+				for (int y = 0; y < height; y++) {
+					for (int x = 0; x < width; x++) {
+						file >> map[y][x];
+					}
+				}
+				maps.push_back(map);
+				file.close();
+			}
+		}
+	}
+
+	void loadMap(int mapIndex) {
+		if (mapIndex >= 0 && mapIndex < maps.size()) {
+			currentMapIndex = mapIndex;
+			// Cập nhật kích thước map
+			MAP_WIDTH = maps[mapIndex][0].size();
+			MAP_HEIGHT = maps[mapIndex].size();
+			WINDOW_WIDTH = MAP_WIDTH * TILE_SIZE;
+			WINDOW_HEIGHT = MAP_HEIGHT * TILE_SIZE + 184;
+			
+			// Cập nhật window size
+			window.setSize(sf::Vector2u(WINDOW_WIDTH, WINDOW_HEIGHT));
+			
+			// Cập nhật tileMap
+			tileMap = maps[mapIndex];
+			
+			// Tìm đường đi mới
+			findPath();
+			
+			// Cập nhật UI
+			setupUI();
+			mapNeedsUpdate = true;
+		}
+	}
+
+	void renderMapSelection() {
+		// Vẽ background
+		sf::RectangleShape background(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
+		background.setFillColor(sf::Color(50, 50, 50));
+		window.draw(background);
+
+		// Vẽ tiêu đề
+		sf::Text title;
+		title.setFont(font);
+		title.setString("Select Map");
+		title.setCharacterSize(48);
+		title.setFillColor(sf::Color::White);
+		title.setPosition(WINDOW_WIDTH / 2 - 100, 50);
+		window.draw(title);
+
+		// Vẽ danh sách map
+		for (int i = 0; i < mapNames.size(); i++) {
+			sf::Text mapText;
+			mapText.setFont(font);
+			mapText.setString(mapNames[i]);
+			mapText.setCharacterSize(32);
+			mapText.setFillColor(i == selectedOption ? sf::Color::Yellow : sf::Color::White);
+			mapText.setPosition(WINDOW_WIDTH / 2 - 200, 150 + i * 60);
+			window.draw(mapText);
+		}
+
+		// Vẽ hướng dẫn
+		sf::Text instructions;
+		instructions.setFont(font);
+		instructions.setString("Use UP/DOWN to select map, ENTER to confirm, ESC to return");
+		instructions.setCharacterSize(24);
+		instructions.setFillColor(sf::Color::White);
+		instructions.setPosition(WINDOW_WIDTH / 2 - 300, WINDOW_HEIGHT - 50);
+		window.draw(instructions);
+	}
+
+	void handleMapSelectionInput(sf::Keyboard::Key key) {
+		switch (key) {
+			case sf::Keyboard::Up:
+				selectedOption = (selectedOption - 1 + mapNames.size()) % mapNames.size();
+				break;
+			case sf::Keyboard::Down:
+				selectedOption = (selectedOption + 1) % mapNames.size();
+				break;
+			case sf::Keyboard::Enter:
+				loadMap(selectedOption);
+				currentScreen = GameScreen::PLAYING;
+				break;
+			case sf::Keyboard::Escape:
+				currentScreen = GameScreen::MAIN_MENU;
+				break;
+		}
+	}
+
+	void update(float deltaTime) {
+		if (currentScreen != GameScreen::PLAYING) return;
+
+		waveSpawnTimer += deltaTime;
+
+		// Bắt đầu wave mới khi nhấn Space
+		if (waitingForNextWave && sf::Keyboard::isKeyPressed(sf::Keyboard::Space)) {
+			if (currentWaveIdx < waves.size()) {
+				waveInProgress = true;
+				waitingForNextWave = false;
+				enemiesSpawned = 0;
+				enemiesToSpawn = waves[currentWaveIdx].numEnemies;
+				waveSpawnTimer = 0.f;
+				gameState.wave = currentWaveIdx + 1;
+			}
+		}
+
+		// Spawn enemies theo wave
+		if (waveInProgress && enemiesSpawned < enemiesToSpawn) {
+			if (waveSpawnTimer >= waves[currentWaveIdx].spawnInterval) {
+				enemies.emplace_back(pathPoints, waves[currentWaveIdx].color, 100.f, 100 + 10 * currentWaveIdx);
+				enemiesSpawned++;
+				waveSpawnTimer = 0.f;
+			}
+		}
+
+		// Khi đã spawn hết và không còn quái trên bản đồ, chuyển sang wave tiếp
+		if (waveInProgress && enemiesSpawned >= enemiesToSpawn && enemies.empty()) {
+			currentWaveIdx++;
+			waveInProgress = false;
+			waitingForNextWave = true;
+		}
+
+		// Update enemies
+		for (auto& e : enemies) {
+			e.update(deltaTime);
+			if (e.reachedEnd()) {
+				gameState.health -= 10;
+				e.setAlive(false);
+			}
+		}
+
+		// Update towers
+		for (auto& tower : towers) {
+			tower.update(deltaTime, bullets, enemies);
+		}
+
+		// Update bullets và kiểm tra va chạm tối ưu
+		for (auto& b : bullets) {
+			if (!b.isActive()) continue;  // Bỏ qua bullet không active
+			
+			b.update(deltaTime);
+			sf::FloatRect bulletBounds = b.getBounds();
+			
+			// Chỉ kiểm tra va chạm với enemies trong phạm vi
+			for (auto& e : enemies) {
+				if (!e.isAlive()) continue;  // Bỏ qua enemy đã chết
+				
+				// Kiểm tra khoảng cách trước khi kiểm tra va chạm
+				sf::Vector2f bulletPos = b.getPosition();
+				sf::Vector2f enemyPos = e.getPosition();
+				float dx = bulletPos.x - enemyPos.x;
+				float dy = bulletPos.y - enemyPos.y;
+				float distanceSquared = dx * dx + dy * dy;
+				
+				// Nếu khoảng cách nhỏ hơn tổng bán kính + một khoảng buffer
+				if (distanceSquared < 1000) {  // 1000 = (20 + 20)^2 + buffer
+					if (b.getBounds().intersects(e.getBounds())) {
+						e.takeDamage(20);
+						if (!e.isAlive()) {
+							gameState.money += 25;
+						}
+						b.setActive(false);
+						break;  // Bullet đã trúng, không cần kiểm tra với enemy khác
+					}
+				}
+			}
+		}
+
+		// Remove inactive bullets and dead enemies
+		bullets.erase(std::remove_if(bullets.begin(), bullets.end(), [](const Bullet& b) {
+			return !b.isActive();
+		}), bullets.end());
+
+		enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) {
+			return !e.isAlive();
+		}), enemies.end());
+
+		// Check game over
+		if (gameState.health <= 0) {
+			currentScreen = GameScreen::GAME_OVER;
+		}
+
+		// Update UI text
+		moneyText.setString("Money: $" + std::to_string(gameState.money));
+		healthText.setString("Health: " + std::to_string(gameState.health));
+		waveText.setString("Wave: " + std::to_string(gameState.wave) + "/" + std::to_string((int)waves.size()));
+	}
+
+	void render() {
+		window.clear();
+
+		switch (currentScreen) {
+		case GameScreen::MAIN_MENU:
+			renderMenu();
+			break;
+		case GameScreen::PLAYING:
+			renderGame();
+			break;
+		case GameScreen::PAUSED:
+			renderGame();
+			renderPauseMenu(window, font, selectedOption);
+			break;
+		case GameScreen::GAME_OVER:
+			renderGameOver();
+			break;
+		case GameScreen::MAP_SELECTION:
+			renderMapSelection();
+			break;
+		}
+
+		window.display();
+	}
+
+	void renderMenu() {
+		sf::Text title;
+		title.setFont(font);
+		title.setString("Tower Defense");
+		title.setCharacterSize(72);
+		title.setFillColor(sf::Color::White);
+		title.setPosition(WINDOW_WIDTH / 2 - 200, 50);
+		window.draw(title);
+
+		for (const auto& option : menuOptions) {
+			window.draw(option);
+		}
+	}
+
+	void renderGame() {
+		// Draw map using vertex array
+		if (mapNeedsUpdate) {
+			setupMapVertices();
+			mapNeedsUpdate = false;
+		}
+		window.draw(mapVertices);
+
+		// Draw path
+		sf::VertexArray pathVertices(sf::Quads);
+		for (auto& p : pathPoints) {
+			float x = p.x * TILE_SIZE + TILE_SIZE / 2 - 10;
+			float y = p.y * TILE_SIZE + TILE_SIZE / 2 - 10;
+			
+			sf::Vertex v1(sf::Vector2f(x, y), sf::Color::White);
+			sf::Vertex v2(sf::Vector2f(x + 20, y), sf::Color::White);
+			sf::Vertex v3(sf::Vector2f(x + 20, y + 20), sf::Color::White);
+			sf::Vertex v4(sf::Vector2f(x, y + 20), sf::Color::White);
+			
+			pathVertices.append(v1);
+			pathVertices.append(v2);
+			pathVertices.append(v3);
+			pathVertices.append(v4);
+		}
+		window.draw(pathVertices);
+
+		// Draw game objects
+		for (auto& e : enemies)
+			e.draw(window);
+
+		for (auto& tower : towers)
+			tower.draw(window);
+
+		for (auto& b : bullets)
+			b.draw(window);
+
+		// Draw selected tower highlight
+		if (selectedTowerIndex != -1) {
+			sf::CircleShape highlight(40);
+			highlight.setOrigin(40, 40);
+			highlight.setPosition(towers[selectedTowerIndex].getPosition());
+			highlight.setFillColor(sf::Color::Transparent);
+			highlight.setOutlineColor(sf::Color::Yellow);
+			highlight.setOutlineThickness(3);
+			window.draw(highlight);
+		}
+
+		// Draw building mode preview
+		if (buildingMode) {
+			sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+			towerPreview.setPosition(mousePos.x, mousePos.y);
+			rangePreview.setPosition(mousePos.x, mousePos.y);
+			window.draw(rangePreview);
+			window.draw(towerPreview);
+		}
+
+		// Draw UI
+		window.draw(uiBackground);
+		window.draw(moneyText);
+		window.draw(healthText);
+		window.draw(waveText);
+
+		// Draw instructions
+		sf::Text instructions;
+		instructions.setFont(font);
+		std::string instr = "B: Build Tower ($100) | Right Click: Select Tower | \n Middle Click: Upgrade ($150) | S: Save | ESC: Pause";
+		if (waitingForNextWave && currentWaveIdx < waves.size()) {
+			instr += " | SPACE: Next Wave";
+		}
+		instructions.setString(instr);
+		instructions.setCharacterSize(24);  // Tăng kích thước chữ
+		instructions.setFillColor(sf::Color::White);
+		instructions.setPosition(400, MAP_HEIGHT * TILE_SIZE + 20);  // Điều chỉnh vị trí
+		window.draw(instructions);
+	}
+
+	void renderPauseMenu(sf::RenderWindow & window, sf::Font & font, int selectedOption) {
+		// Tạo lớp phủ mờ
+		sf::RectangleShape overlay(sf::Vector2f(WINDOW_WIDTH, WINDOW_HEIGHT));
+		overlay.setFillColor(sf::Color(0, 0, 0, 180));
+		window.draw(overlay);
+
+		// Tiêu đề PAUSED
+		sf::Text title;
+		title.setFont(font);
+		title.setString("PAUSED");
+		title.setCharacterSize(48);
+		title.setFillColor(sf::Color::White);
+		title.setPosition(WINDOW_WIDTH / 2 - 100, WINDOW_HEIGHT / 2 - 150);
+		window.draw(title);
+
+		// Tùy chọn menu
+		std::vector<std::string> options = { "Continue", "Return to Main Menu" };
+		for (int i = 0; i < options.size(); ++i) {
+			sf::Text optionText;
+			optionText.setFont(font);
+			optionText.setString(options[i]);
+			optionText.setCharacterSize(36);
+			optionText.setFillColor(i == selectedOption ? sf::Color::Yellow : sf::Color::White);
+			optionText.setPosition(WINDOW_WIDTH / 2 - 150, WINDOW_HEIGHT / 2 - 30 + i * 60);
+			window.draw(optionText);
+		}
+	}
+
+	void renderGameOver() {
+		sf::Text gameOverText;
+		gameOverText.setFont(font);
+		gameOverText.setString("GAME OVER\nPress ESC to return to menu");
+		gameOverText.setCharacterSize(48);
+		gameOverText.setFillColor(sf::Color::Red);
+		gameOverText.setPosition(WINDOW_WIDTH / 2 - 200, WINDOW_HEIGHT / 2 - 50);
+		window.draw(gameOverText);
+	}
+
+	void run() {
+		while (window.isOpen()) {
+			float deltaTime = frameClock.restart().asSeconds();
+			
+			// Đảm bảo deltaTime không quá lớn để tránh physics glitch
+			if (deltaTime > 0.25f) deltaTime = 0.25f;
+			
+			handleEvents();
+			update(deltaTime);  // Truyền deltaTime vào update
+			render();
+			
+			// Sleep nếu frame quá nhanh
+			sf::Time frameTime = frameClock.getElapsedTime();
+			if (frameTime < sf::seconds(1.0f / TARGET_FPS)) {
+				sf::sleep(sf::seconds(1.0f / TARGET_FPS) - frameTime);
+			}
+		}
+	}
+};
+
+int main() {
+	Game game;
+	game.run();
+	return 0;
+}
 	

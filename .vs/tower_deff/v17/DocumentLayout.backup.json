@@ -7,16 +7,16 @@
       "RelativeMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|solutionrelative:tower_deff\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Bullet.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|solutionrelative:tower_deff\\Bullet.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Bullet.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|solutionrelative:tower_deff\\Bullet.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Enemy.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|solutionrelative:tower_deff\\Enemy.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Bullet.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|solutionrelative:tower_deff\\Bullet.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Bullet.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|solutionrelative:tower_deff\\Bullet.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{6AD5E752-1BE8-4314-A9CA-5C6B84E6D796}|tower_deff\\tower_deff.vcxproj|C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Tower.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
@@ -45,24 +45,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "GameState.h",
-              "DocumentMoniker": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\GameState.h",
-              "RelativeDocumentMoniker": "tower_deff\\GameState.h",
-              "ToolTip": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\GameState.h",
-              "RelativeToolTip": "tower_deff\\GameState.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAACAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-05-28T15:50:29.622Z",
-              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -74,8 +61,7 @@
               "RelativeToolTip": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.41.34120\\include\\vector",
               "ViewState": "AgIAAFEHAAAAAAAAAADwv18HAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-05-27T18:32:13.644Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-27T18:32:13.644Z"
             },
             {
               "$type": "Document",
@@ -85,10 +71,22 @@
               "RelativeDocumentMoniker": "tower_deff\\main.cpp",
               "ToolTip": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\main.cpp",
               "RelativeToolTip": "tower_deff\\main.cpp",
-              "ViewState": "AgIAAPsBAAAAAAAAAAArwA0CAAApAAAAAAAAAA==",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAUwB8AAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-05-27T17:40:31.947Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "GameState.h",
+              "DocumentMoniker": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\GameState.h",
+              "RelativeDocumentMoniker": "tower_deff\\GameState.h",
+              "ToolTip": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\GameState.h",
+              "RelativeToolTip": "tower_deff\\GameState.h",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2025-05-28T15:50:29.622Z"
             },
             {
               "$type": "Document",
@@ -100,8 +98,7 @@
               "RelativeToolTip": "tower_deff\\Tower.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-05-27T17:45:52.287Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-27T17:45:52.287Z"
             },
             {
               "$type": "Document",
@@ -113,12 +110,11 @@
               "RelativeToolTip": "tower_deff\\Enemy.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAACAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-05-27T17:45:33.347Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-27T17:45:33.347Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "Bullet.h",
               "DocumentMoniker": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Bullet.h",
               "RelativeDocumentMoniker": "tower_deff\\Bullet.h",
@@ -126,8 +122,7 @@
               "RelativeToolTip": "tower_deff\\Bullet.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-05-27T17:45:14.102Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-27T17:45:14.102Z"
             },
             {
               "$type": "Document",
@@ -139,8 +134,7 @@
               "RelativeToolTip": "tower_deff\\Tower.cpp",
               "ViewState": "AgIAABUAAAAAAAAAAAAAACsAAAAcAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-05-27T17:45:09.392Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-27T17:45:09.392Z"
             },
             {
               "$type": "Document",
@@ -150,20 +144,19 @@
               "RelativeDocumentMoniker": "tower_deff\\Enemy.cpp",
               "ToolTip": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Enemy.cpp",
               "RelativeToolTip": "tower_deff\\Enemy.cpp",
-              "ViewState": "AgIAAD8AAAAAAAAAAAAAwFYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFYAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-05-27T17:45:07.757Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-27T17:45:07.757Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
               "Title": "Bullet.cpp",
               "DocumentMoniker": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Bullet.cpp",
               "RelativeDocumentMoniker": "tower_deff\\Bullet.cpp",
               "ToolTip": "C:\\Users\\LOQ\\Documents\\GitHub\\Tower_Defense\\tower_deff\\Bullet.cpp",
               "RelativeToolTip": "tower_deff\\Bullet.cpp",
-              "ViewState": "AgIAABUAAAAAAAAAAAAAACgAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAABsAAAAAAAAAAAArwCoAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-05-27T17:40:29.945Z",
               "EditorCaption": ""
