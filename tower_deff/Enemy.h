@@ -1,50 +1,43 @@
 ﻿#pragma once
-
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include <cmath> // để dùng sqrt()
-
-// Biến toàn cục bạn cần khai báo ở đâu đó (ví dụ trong main.cpp)
-extern std::vector<sf::Vector2i> pathPoints;
-extern const int TILE_SIZE;
 
 class Enemy {
-public:
+private:
+    /* --- di chuyển --- */
+    std::vector<sf::Vector2f> path;
+    std::size_t  currentTargetIndex;
+
+    float  baseSpeed;       // tốc cơ bản
+    float  currentSpeed;    // tốc hiện tại (bị slow sẽ giảm)
+    float  slowTimer;       // còn bao nhiêu giây slow
+
+    /* --- máu --- */
+    int    hp;
+    int    maxHp;
+    bool   alive;
+
+    /* --- hiển thị --- */
     sf::CircleShape shape;
-    float speed = 100.f;
-    int currentPoint = 0;
-    sf::Vector2f position;
-    void draw(sf::RenderWindow& window) const {
-        window.draw(shape);
-    }
-    Enemy() {
-        // Khởi tạo vị trí dựa trên điểm đầu tiên trong đường đi
-        position = sf::Vector2f(pathPoints[0].x * TILE_SIZE, pathPoints[0].y * TILE_SIZE);
-        shape.setRadius(20.f);
-        shape.setFillColor(sf::Color::Red);
-        shape.setPosition(position);
-    }
 
-    void update(float deltaTime) {
-        if (currentPoint + 1 >= pathPoints.size()) return;
+public:
+    Enemy(const std::vector<sf::Vector2i>& pathTiles,
+        sf::Color color,
+        float speed,
+        int   hp);
 
-        sf::Vector2f target(pathPoints[currentPoint + 1].x * TILE_SIZE,
-            pathPoints[currentPoint + 1].y * TILE_SIZE);
+    void update(float dt);
+    void draw(sf::RenderWindow& window) const;
 
-        sf::Vector2f direction = target - position;
-        float distance = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (distance != 0) direction /= distance;
+    /* --- va chạm & trạng thái --- */
+    sf::FloatRect getBounds() const;
+    void  takeDamage(int dmg);
+    bool  isAlive() const;
+    void  setAlive(bool status);
+    bool  reachedEnd() const;
 
-        position += direction * speed * deltaTime;
+    sf::Vector2f getPosition() const;
 
-        // Nếu đã đến gần điểm tiếp theo thì chuyển sang điểm kế tiếp
-        if (distance < 5.f)
-            currentPoint++;
-
-        shape.setPosition(position);
-    }
-
-    void draw(sf::RenderWindow& window) {
-        window.draw(shape);
-    }
+    /* --- NEW: hiệu ứng slow --- */
+    void  applySlow(float factor, float duration);
 };

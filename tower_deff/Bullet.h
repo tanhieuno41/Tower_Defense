@@ -1,36 +1,29 @@
-#pragma once
+﻿#pragma once
 #include <SFML/Graphics.hpp>
-#include <cmath>
+#include "Constants.h"       // thêm dòng này
 
 class Bullet {
-public:
-    void draw(sf::RenderWindow& window) const {
-        window.draw(shape);
-    }
+private:
     sf::CircleShape shape;
-    sf::Vector2f position;
-    sf::Vector2f velocity;
-    float speed = 300.f;
-    bool active = true;
+    sf::Vector2f    velocity;
+    int             damage;
+    BulletType      type;    // ★ mới
 
-    Bullet(sf::Vector2f startPos, sf::Vector2f targetPos) {
-        position = startPos;
-        shape.setRadius(5.f);
-        shape.setFillColor(sf::Color::Yellow);
-        shape.setPosition(position);
+    float           slowFactor;   // chỉ dùng với SLOW
+    float           lifeTime;     // tự hủy sau N giây
 
-        sf::Vector2f direction = targetPos - startPos;
-        float length = std::sqrt(direction.x * direction.x + direction.y * direction.y);
-        if (length != 0) direction /= length;
-        velocity = direction * speed;
-    }
+public:
+    Bullet(sf::Vector2f pos,
+        sf::Vector2f dir,
+        int dmg,
+        BulletType bt = BulletType::NORMAL);
 
-    void update(float deltaTime) {
-        position += velocity * deltaTime;
-        shape.setPosition(position);
-    }
+    void   update(float dt);
+    void   draw(sf::RenderWindow& win) const;
+    bool   isActive()   const;
+    void   deactivate();
+    BulletType getType()  const { return type; }
+    int    getDamage() const { return damage; }
 
-    void draw(sf::RenderWindow& window) {
-        window.draw(shape);
-    }
+    sf::FloatRect getBounds() const { return shape.getGlobalBounds(); }
 };
